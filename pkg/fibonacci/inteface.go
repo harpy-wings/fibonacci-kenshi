@@ -19,3 +19,8 @@ type IFibonacci interface {
 	// F calculates the nth element of the fibonacci series.
 	F(n big.Int) (big.Int, error)
 }
+
+// DB schima
+// Fn => Value
+// Value => Fn
+// LastIndex => n
