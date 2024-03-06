@@ -34,7 +34,7 @@ func (c *defaultController) Post(ctx echo.Context) error {
 	if err != nil {
 		return errors.Join(err, fmt.Errorf("decode failed"))
 	}
-	next, err := c.FB.Next(FNum)
+-8888888888888888888888888	next, err := c.FB.Next(FNum)
 	if err != nil {
 		return errors.Join(err, fmt.Errorf("fibonacci calculation failed"))
 	}

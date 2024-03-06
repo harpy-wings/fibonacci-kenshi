@@ -3,7 +3,10 @@ package app
 import (
 	"fmt"
 
+	"github.com/harpy-wings/fibonacci-kenshi/internal/controllers"
 	"github.com/harpy-wings/fibonacci-kenshi/pkg/config"
+	"github.com/harpy-wings/fibonacci-kenshi/pkg/constants"
+	"github.com/harpy-wings/fibonacci-kenshi/pkg/fibonacci"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -20,8 +23,10 @@ func (a *App) ListenAndServe() error {
 
 func New() (*App, error) {
 	var (
-	// v *viper.Viper Using Singleton pattern for Viper and Logger
-	// logger *log.Logger Using Singleton pattern for Viper and Logger
+		// v *viper.Viper Using Singleton pattern for Viper and Logger
+		// logger *log.Logger Using Singleton pattern for Viper and Logger
+		FB  fibonacci.IFibonacci
+		err error
 	)
 	app := new(App)
 	app.s = echo.New()
@@ -40,5 +45,26 @@ func New() (*App, error) {
 	}
 	// Init Instrumentations and etc.
 	app.port = viper.GetInt("port")
+
+	// create Modules
+	{
+		var ops = []fibonacci.Option{fibonacci.OptionWithCaching(true)}
+		if v := viper.GetInt(constants.MaxBitSize); v != 0 {
+			ops = append(ops, fibonacci.OptionWithMaxBitSize(v))
+		}
+		FB, err = fibonacci.New(ops...)
+		if err != nil {
+			return nil, err
+		}
+	}
+	{
+		//register Controllers
+		C := controllers.NewDefaultController(FB)
+		err = C.Register(app.s)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return app, nil
 }

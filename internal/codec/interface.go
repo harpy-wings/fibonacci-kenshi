@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"math/big"
 )
@@ -15,19 +16,51 @@ type codec struct {
 }
 
 func (c *codec) Encode(n *big.Int) ([]byte, error) {
-	bs, err := json.Marshal(n)
-	if err != nil {
-		return nil, err
+
+	switch c.kind {
+	case codecKindJSON:
+		bs, err := json.Marshal(struct {
+			N string `json:"n"`
+		}{N: n.String()})
+		if err != nil {
+			return nil, err
+		}
+		return bs, nil
+	case codecKindBinary:
+		return []byte(base64.StdEncoding.EncodeToString(n.Bytes())), nil
+	default:
+		return nil, ErrInvalidCodec
 	}
-	return bs, nil
+
 }
 func (c *codec) Decode(bs []byte) (*big.Int, error) {
-	v := new(big.Int)
-	err := v.UnmarshalJSON(bs)
-	if err != nil {
-		return nil, err
+	switch c.kind {
+	case codecKindJSON:
+		var data struct {
+			N string `json:"n"`
+		}
+		err := json.Unmarshal(bs, &data)
+		if err != nil {
+			return nil, err
+		}
+		v := new(big.Int)
+		err = v.UnmarshalJSON([]byte(data.N))
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	case codecKindBinary:
+		bs, err := base64.StdEncoding.DecodeString(string(bs))
+		if err != nil {
+			return nil, err
+		}
+		V := new(big.Int)
+		V.FillBytes(bs)
+		return V, nil
+	default:
+		return nil, ErrInvalidCodec
 	}
-	return v, nil
+
 }
 
 type codecKind int
@@ -39,5 +72,12 @@ const (
 )
 
 func New(ops ...Option) (Codec, error) {
-	return &codec{kind: codecKindJSON}, nil
+	c := new(codec)
+	for _, fn := range ops {
+		err := fn(c)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c, nil
 }
