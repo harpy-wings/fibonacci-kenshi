@@ -8,3 +8,13 @@ func OptionWithCaching(v bool) Option {
 		return nil
 	}
 }
+
+func OptionWithMaxBitSize(v int) Option {
+	return func(f *Fibonacci) error {
+		if v < 0 {
+			return ErrInvalidBitSize
+		}
+		f.config.maxBitSize = v
+		return nil
+	}
+}
