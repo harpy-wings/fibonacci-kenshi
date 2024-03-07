@@ -14,7 +14,6 @@ type IFibonacci interface {
 	F(n int) (*big.Int, error)
 }
 
-// DB schima
+// DB schema
 // Fn => Value
 // Value => Fn
-// LastIndex => n
