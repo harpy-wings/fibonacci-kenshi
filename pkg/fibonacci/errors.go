@@ -1,13 +1,16 @@
 package fibonacci
 
-import "errors"
+import (
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
 var (
-	ErrUnimplemented       = errors.New("unimplemented")
-	ErrNotfound            = errors.New("not found")
-	ErrTypeAssertionFailed = errors.New("type assertion failed")
-	ErrTooBig              = errors.New("too big")
-	ErrInvalidIndex        = errors.New("invalid index, index must be grater than or equal to zero.")
-	ErrInvalidNumber       = errors.New("invalid number")
-	ErrInvalidBitSize      = errors.New("invalid bit size")
+	ErrUnimplemented       = status.Error(codes.Internal, "unimplemented")
+	ErrNotfound            = status.Error(codes.NotFound, "not found")
+	ErrTypeAssertionFailed = status.Error(codes.Internal, "type assertion failed")
+	ErrTooBig              = status.Error(codes.OutOfRange, "too big")
+	ErrInvalidIndex        = status.Error(codes.InvalidArgument, "invalid index, index must be grater than or equal to zero.")
+	ErrInvalidNumber       = status.Error(codes.InvalidArgument, "invalid number")
+	ErrInvalidBitSize      = status.Error(codes.InvalidArgument, "invalid bit size")
 )

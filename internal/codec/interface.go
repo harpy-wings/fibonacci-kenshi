@@ -27,7 +27,7 @@ func (c *codec) Encode(n *big.Int) ([]byte, error) {
 		}
 		return bs, nil
 	case codecKindBinary:
-		return []byte(base64.StdEncoding.EncodeToString(n.Bytes())), nil
+		return []byte(base64.RawStdEncoding.EncodeToString(n.Bytes())), nil
 	default:
 		return nil, ErrInvalidCodec
 	}
@@ -50,12 +50,11 @@ func (c *codec) Decode(bs []byte) (*big.Int, error) {
 		}
 		return v, nil
 	case codecKindBinary:
-		bs, err := base64.StdEncoding.DecodeString(string(bs))
+		bss, err := base64.RawStdEncoding.DecodeString(string(bs))
 		if err != nil {
 			return nil, err
 		}
-		V := new(big.Int)
-		V.FillBytes(bs)
+		V := new(big.Int).SetBytes(bss)
 		return V, nil
 	default:
 		return nil, ErrInvalidCodec

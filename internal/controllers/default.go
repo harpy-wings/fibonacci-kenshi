@@ -10,6 +10,7 @@ import (
 	"github.com/harpy-wings/fibonacci-kenshi/pkg/constants"
 	"github.com/harpy-wings/fibonacci-kenshi/pkg/fibonacci"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/status"
 )
 
 type defaultController struct {
@@ -55,5 +56,14 @@ func (c *defaultController) Post(ctx echo.Context) error {
 
 func (c *defaultController) Register(e *echo.Echo) error {
 	e.POST("/", c.Post)
+	e.HTTPErrorHandler = defaultErrorHandler
 	return nil
+}
+
+func defaultErrorHandler(err error, c echo.Context) {
+	var httpStatusCode int = http.StatusInternalServerError
+	if statusCode, ok := errCodeMapping[status.Code(err)]; ok {
+		httpStatusCode = statusCode
+	}
+	c.String(httpStatusCode, err.Error())
 }
